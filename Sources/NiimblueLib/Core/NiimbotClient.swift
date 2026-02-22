@@ -149,10 +149,22 @@ public class NiimbotClient: TransportDelegate {
 
         _ = try await send(PacketGenerator.pageEnd())
 
-        // Wait for print completion - Basic implementation
-        // Polling loop
-        for _ in 0..<20 { // Poll for 10 seconds (0.5s interval)
-            try await Task.sleep(nanoseconds: 500_000_000)
+        // Poll PrintStatus until the printer reports completion
+        for _ in 0..<100 { // Safety cap: 100 iterations × 300ms = 30s max
+            try await Task.sleep(nanoseconds: 300_000_000) // 300ms
+
+            if let response = try await send(PacketGenerator.printStatus()) {
+                let data = response.data
+                if data.count >= 4 {
+                    let page = (UInt16(data[0]) << 8) | UInt16(data[1])
+                    let printProgress = data[2]
+                    let feedProgress = data[3]
+                    Swift.print("Print status: page=\(page)/\(quantity), print=\(printProgress)%, feed=\(feedProgress)%")
+                    if page >= UInt16(quantity) && printProgress == 100 && feedProgress == 100 {
+                        break
+                    }
+                }
+            }
         }
 
         _ = try await send(PacketGenerator.printEnd())

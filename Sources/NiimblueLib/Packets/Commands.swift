@@ -136,6 +136,7 @@ public struct CommandsMap: Sendable {
         .SetPageSize: [.In_SetPageSize],
         .PrinterReset: [.In_PrinterReset],
         .CancelPrint: [.In_CancelPrint],
+        .PrintStatus: [.In_PrintStatus],
         .SoundSettings: [.In_SoundSettings],
         .PrintEmptyRow: nil,
         .PrintBitmapRow: nil,

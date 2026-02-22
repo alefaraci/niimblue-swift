@@ -57,6 +57,10 @@ public struct PacketGenerator {
         return NiimbotPacket(command: RequestCommandId.PageEnd.rawValue, data: [1])
     }
     
+    public static func printStatus() -> NiimbotPacket {
+        return NiimbotPacket(command: RequestCommandId.PrintStatus.rawValue, data: [1])
+    }
+
     public static func printClear() -> NiimbotPacket {
         return NiimbotPacket(command: RequestCommandId.PrintClear.rawValue, data: [1])
     }
