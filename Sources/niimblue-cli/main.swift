@@ -66,6 +66,9 @@ struct Print: AsyncParsableCommand {
     
     @Option(name: [.customShort("D"), .long], help: "Print direction (left/top)")
     var direction: String = "left"
+
+    @Option(name: .shortAndLong, help: "Black/white threshold (0-255, default 128)")
+    var threshold: Int = 128
     
     func run() async throws {
         let transport = await BLETransport(deviceNameOrAddress: address)
@@ -78,7 +81,7 @@ struct Print: AsyncParsableCommand {
         let printDirection = PrintDirection(rawValue: direction) ?? .left
         
         print("Encoding image...")
-        let encoded = try ImageEncoder.encode(imagePath: path, printDirection: printDirection)
+        let encoded = try ImageEncoder.encode(imagePath: path, printDirection: printDirection, threshold: UInt8(threshold))
         
         print("Printing \(quantity) copies...")
         

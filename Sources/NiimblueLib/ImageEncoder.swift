@@ -28,17 +28,17 @@ public enum PrintDirection: String, Sendable {
 
 public class ImageEncoder {
     
-    public static func encode(imagePath: String, printDirection: PrintDirection = .left) throws -> EncodedImage {
+    public static func encode(imagePath: String, printDirection: PrintDirection = .left, threshold: UInt8 = 128) throws -> EncodedImage {
         let url = URL(fileURLWithPath: imagePath)
         guard let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil),
               let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil)
         else {
              throw NSError(domain: "ImageEncoder", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to load image"])
         }
-        return encode(image: cgImage, printDirection: printDirection)
+        return encode(image: cgImage, printDirection: printDirection, threshold: threshold)
     }
 
-    public static func encode(image: CGImage, printDirection: PrintDirection = .left) -> EncodedImage {
+    public static func encode(image: CGImage, printDirection: PrintDirection = .left, threshold: UInt8 = 128) -> EncodedImage {
         let width = image.width
         let height = image.height
         
@@ -49,13 +49,22 @@ public class ImageEncoder {
             fatalError("Failed to create graphics context")
         }
         
+        // Flatten transparency to white background (matches Node.js .flatten({background: "#fff"}))
+        context.setFillColor(CGColor(gray: 1.0, alpha: 1.0))
+        context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+
         context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
         
         guard let pixelData = context.data else {
             fatalError("Failed to get pixel data")
         }
         
+        // Apply binary threshold (matches Node.js .threshold(128))
+        // Pixels >= threshold become 255 (white), pixels < threshold become 0 (black)
         let ptr = pixelData.bindMemory(to: UInt8.self, capacity: width * height)
+        for i in 0..<(width * height) {
+            ptr[i] = ptr[i] >= threshold ? 0xFF : 0x00
+        }
         let buffer = UnsafeBufferPointer(start: ptr, count: width * height)
         
         var cols = width
