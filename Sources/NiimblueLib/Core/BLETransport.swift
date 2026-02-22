@@ -5,6 +5,9 @@ import Foundation
 public class BLETransport: NSObject, Transport, CBCentralManagerDelegate, CBPeripheralDelegate {
     public weak var delegate: TransportDelegate?
 
+    /// Known Niimbot printer BLE service UUID.
+    private static let niimbotServiceUUID = CBUUID(string: "e7810a71-73ae-499d-8c15-faa9aef0c3f2")
+
     private var centralManager: CBCentralManager!
     private var peripheral: CBPeripheral?
     private var characteristic: CBCharacteristic?
@@ -163,7 +166,8 @@ public class BLETransport: NSObject, Transport, CBCentralManagerDelegate, CBPeri
     nonisolated public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         MainActor.assumeIsolated {
             peripheral.delegate = self
-            peripheral.discoverServices(nil)
+            // First try to discover only the known Niimbot service
+            peripheral.discoverServices([BLETransport.niimbotServiceUUID])
         }
     }
 
@@ -189,7 +193,17 @@ public class BLETransport: NSObject, Transport, CBCentralManagerDelegate, CBPeri
 
     nonisolated public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         MainActor.assumeIsolated {
-            guard let services = peripheral.services else { return }
+            guard let services = peripheral.services else {
+                // No services found — fallback: rediscover all services
+                peripheral.discoverServices(nil)
+                return
+            }
+
+            if services.isEmpty {
+                // Niimbot service not found — fallback: discover all services
+                peripheral.discoverServices(nil)
+                return
+            }
 
             for service in services {
                 peripheral.discoverCharacteristics(nil, for: service)
@@ -203,20 +217,38 @@ public class BLETransport: NSObject, Transport, CBCentralManagerDelegate, CBPeri
             guard !self.didConnect else { return }
             guard let characteristics = service.characteristics else { return }
 
+            // Filter out standard Bluetooth services (UUID length <= 4)
+            // per protocol spec: only consider vendor-specific services
+            let serviceUUID = service.uuid.uuidString
+            guard serviceUUID.count > 4 else { return }
+
             for characteristic in characteristics {
                 if characteristic.properties.contains(.notify) && (characteristic.properties.contains(.writeWithoutResponse) || characteristic.properties.contains(.write)) {
                     self.didConnect = true
                     self.characteristic = characteristic
+                    // Don't resume connectionContinuation yet — wait for
+                    // didUpdateNotificationStateFor to confirm notifications are active.
                     peripheral.setNotifyValue(true, for: characteristic)
-
-                    if let continuation = self.connectionContinuation {
-                        continuation.resume()
-                        self.connectionContinuation = nil
-                    }
-                    self.delegate?.transportDidConnect(self)
                     return
                 }
             }
+        }
+    }
+
+    nonisolated public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+        MainActor.assumeIsolated {
+            if let error = error {
+                if let continuation = self.connectionContinuation {
+                    continuation.resume(throwing: error)
+                    self.connectionContinuation = nil
+                }
+                return
+            }
+            if let continuation = self.connectionContinuation {
+                continuation.resume()
+                self.connectionContinuation = nil
+            }
+            self.delegate?.transportDidConnect(self)
         }
     }
 

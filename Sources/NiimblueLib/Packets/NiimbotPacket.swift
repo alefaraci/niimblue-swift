@@ -31,6 +31,11 @@ public struct NiimbotPacket: Sendable {
         packet.append(checksum)
         packet.append(contentsOf: NiimbotPacket.TAIL)
 
+        // Connect packet must be prefixed with 0x03 (per protocol spec)
+        if command == RequestCommandId.Connect.rawValue {
+            return [0x03] + packet
+        }
+
         return packet
     }
     
