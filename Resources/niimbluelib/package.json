@@ -1,0 +1,54 @@
+{
+  "name": "@mmote/niimbluelib",
+  "version": "0.0.1-alpha.36",
+  "description": "Library for the communication with NIIMBOT printers",
+  "keywords": [
+    "reverse-engineering",
+    "thermal-printer",
+    "label-printer",
+    "niimbot",
+    "niimbot-d110",
+    "niimbot-b1",
+    "niimbot-b21",
+    "bluetooth",
+    "serial",
+    "capacitor"
+  ],
+  "main": "dist/cjs/index.js",
+  "types": "dist/cjs/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MultiMote/niimbluelib.git"
+  },
+  "author": "MultiMote",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "clean-build": "npm run clean && npm run build",
+    "build": "tsc --build",
+    "watch": "tsc --watch",
+    "build:bundle": "node bundle.mjs",
+    "parse-wireshark-dump": "npm run build && node tools/parse-wireshark-dump.mjs",
+    "parse-text-dump": "npm run build && node tools/parse-text-dump.mjs",
+    "clean": "node clean-dist.mjs",
+    "gen-printer-models": "node tools/gen-printer-models.js > src/printer_models.ts",
+    "gen-printer-models-md": "node tools/gen-printer-models-md.js > docs/documents/niimbot_models.md"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "@types/w3c-web-serial": "^1.0.8",
+    "@types/web-bluetooth": "^0.0.21",
+    "esbuild": "0.25.8",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@capacitor-community/bluetooth-le": "^7.1.0",
+    "@capacitor/core": "^7.2.0",
+    "async-mutex": "^0.5.0",
+    "crc-32": "^1.2.2",
+    "eventemitter3": "^5.0.1"
+  }
+}

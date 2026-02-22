@@ -1,0 +1,48 @@
+site_name: NIIMBOT Community Wiki
+site_url: https://printers.niim.blue/
+
+repo_url: https://github.com/MultiMote/niimbot-wiki
+edit_uri: edit/main/docs
+
+extra_css:
+  - css/custom.css
+
+theme:
+  name: readthedocs
+  highlightjs: true
+  hljs_languages:
+    - yaml
+    - c
+    - cpp
+    - http
+    - python
+
+markdown_extensions:
+  - admonition
+  - pymdownx.magiclink
+  - pymdownx.emoji
+  - footnotes
+
+plugins:
+  search:
+  literate-nav:
+  unused_files:
+    excluded_files:
+      - "custom.css"
+      - "*.svg"
+
+nav:
+  - 'index.md'
+  - Interfacing:
+      - interfacing/connecting.md
+      - interfacing/proto.md
+      - interfacing/print-tasks.md
+      - "interfacing/*"
+
+  - Hardware:
+      - "hardware/models.md"
+      - "hardware/*"
+
+  - Firmware: firmware/
+  - Other: other/
+

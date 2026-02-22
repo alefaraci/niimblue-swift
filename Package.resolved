@@ -1,0 +1,24 @@
+{
+  "originHash" : "6c52a3c30e7cd78a8ce481e31c781681b9c2fe2d7faeed855f9fe5140c2007de",
+  "pins" : [
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "c5d11a805e765f52ba34ec7284bd4fcd6ba68615",
+        "version" : "1.7.0"
+      }
+    },
+    {
+      "identity" : "swiftserial",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/yeokm1/SwiftSerial.git",
+      "state" : {
+        "revision" : "0e824cc38c6802e69543d0c1406d34babfd68e2e",
+        "version" : "0.1.2"
+      }
+    }
+  ],
+  "version" : 3
+}
