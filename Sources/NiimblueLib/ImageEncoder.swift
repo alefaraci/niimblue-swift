@@ -123,11 +123,10 @@ public class ImageEncoder {
     }
     
     private static func isPixelNonWhite(buffer: UnsafeBufferPointer<UInt8>, width: Int, height: Int, x: Int, y: Int, printDirection: PrintDirection) -> Bool {
-        // CGContext stores pixels bottom-to-top, so flip Y to get top-to-bottom order
-        var idx = (height - 1 - y) * width + x
+        var idx = y * width + x
 
         if printDirection == .left {
-            idx = x * width + y
+            idx = (height - 1 - x) * width + y
         }
         
         // Bounds check
