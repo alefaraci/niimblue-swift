@@ -59,16 +59,16 @@ struct Print: AsyncParsableCommand {
     var density: Int = 3
     
     @Option(name: .shortAndLong, help: "Label type (1=gap, 2=black, 3=continuous)")
-    var labelType: Int = 1
+    var labelType: Int = 3
     
     @Option(name: .shortAndLong, help: "Quantity")
     var quantity: Int = 1
     
     @Option(name: [.customShort("D"), .long], help: "Print direction (left/top)")
-    var direction: String = "left"
+    var direction: String = "top"
 
-    @Option(name: .shortAndLong, help: "Black/white threshold (0-255, default 128)")
-    var threshold: Int = 128
+    @Option(name: .shortAndLong, help: "Black/white threshold (0-255, default 136)")
+    var threshold: Int = 136
     
     func run() async throws {
         let transport = await BLETransport(deviceNameOrAddress: address)
